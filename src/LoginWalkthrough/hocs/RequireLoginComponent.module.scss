@@ -1,0 +1,39 @@
+@import "~styles/variables.scss";
+
+.loginWrapper {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+:global(.modal-open):global(.unfixed) {
+  .loginWrapper {
+    position: fixed;
+  }
+}
+
+.notLoggedInWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.notLoggedIn {
+  margin: $s-spacing;
+  max-width: 38rem;;
+}
+
+.notLoggedInCard {
+  padding: $l-spacing;
+
+  button {
+    @media only screen and (min-width: 48em) {
+      width: auto;
+    }
+  }
+}
+
+.subText {
+  margin: $l-spacing;
+}

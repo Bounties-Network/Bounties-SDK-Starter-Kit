@@ -1,0 +1,37 @@
+{
+	"deployments": {
+		"directory": { "rinkeby": "0xb45c55d36d29db293a3e5c6d2f54e882486f0415" }
+	},
+	"interfaces": {
+		"directory": [
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"name": "_handle",
+						"type": "string"
+					}
+				],
+				"name": "setHandle",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getHandle",
+				"outputs": [
+					{
+						"name": "_handle",
+						"type": "string"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			}
+		]
+	}
+}
