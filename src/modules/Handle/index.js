@@ -1,3 +1,6 @@
+import { actionTypes as modulesActionTypes } from '@bounties-network/modules';
+
+const { SET_ADDRESS } = modulesActionTypes.client;
 const defaultHandleState = {
   loading: false,
   error: false,
@@ -38,12 +41,21 @@ const saveHandleFail      = error  => ({ type: SAVE_HANDLE_FAIL, error });
 const SAVE_ONCHAIN_HANDLE         = 'handle/SAVE_ONCHAIN_HANDLE';
 const SAVE_ONCHAIN_HANDLE_SUCCESS = 'handle/SAVE_ONCHAIN_HANDLE_SUCCESS';
 const SAVE_ONCHAIN_HANDLE_FAIL    = 'handle/SAVE_ONCHAIN_HANDLE_FAIL';
-const saveOnChainHandle           = handle => ({ type: SAVE_ONCHAIN_HANDLE, handle });
-const saveOnChainHandleSuccess    = handle => ({ type: SAVE_ONCHAIN_HANDLE_SUCCESS, handle });
-const saveOnChainHandleFail       = error  => ({ type: SAVE_ONCHAIN_HANDLE_FAIL, error });
+const SAVE_ONCHAIN_HANDLE_TX_COMPLETED = 'handle/SAVE_ONCHAIN_HANDLE_TX_COMPLETED';
+const saveOnChainHandle            = handle => ({ type: SAVE_ONCHAIN_HANDLE, handle });
+const saveOnChainHandleSuccess     = txHash => ({ type: SAVE_ONCHAIN_HANDLE_SUCCESS, txHash });
+const saveOnChainHandleTxCompleted = ()     => ({ type: SAVE_ONCHAIN_HANDLE_TX_COMPLETED })
+const saveOnChainHandleFail        = error  => ({ type: SAVE_ONCHAIN_HANDLE_FAIL, error });
 
 function HandleReducer(state = initialState, action) {
   switch (action.type) {
+    case SET_ADDRESS:
+      return {
+        ...state,
+        offchain: { ...state.offchain, loading: true, error: false },
+        onchain: { ...state.onchain, loading: true, saveError: false }
+      }
+
     case LOAD_HANDLE:
       return {
         ...state,
@@ -63,17 +75,17 @@ function HandleReducer(state = initialState, action) {
     case LOAD_ONCHAIN_HANDLE:
       return {
         ...state,
-        onchain: { ...state.onchain, saving: true, saveError: false }
+        onchain: { ...state.onchain, loading: true, saveError: false }
       }
     case LOAD_ONCHAIN_HANDLE_SUCCESS:
       return {
         ...state,
-        onchain: { ...state.onchain, handle: action.handle }
+        onchain: { ...state.onchain, loading: false, handle: action.handle }
       }
     case LOAD_ONCHAIN_HANDLE_FAIL:
       return {
         ...state,
-        onchain: { ...state.onchain, saveError: true }
+        onchain: { ...state.onchain, loading: false, saveError: true }
       }
 
     // case LOAD_HANDLE: {
@@ -92,17 +104,22 @@ function HandleReducer(state = initialState, action) {
     case SAVE_ONCHAIN_HANDLE:
       return {
         ...state,
-        onchain: { ...state.onchain, loading: true, error: false }
+        onchain: { ...state.onchain, saving: true, error: false }
       }
     case SAVE_ONCHAIN_HANDLE_SUCCESS:
       return {
         ...state,
-        onchain: { ...state.onchain, handle: action.handle }
+        onchain: { ...state.onchain, txHash: action.txHash }
+      }
+    case SAVE_ONCHAIN_HANDLE_TX_COMPLETED:
+      return {
+        ...state,
+        onchain: { ...state.onchain, saving: false, error: false }
       }
     case SAVE_ONCHAIN_HANDLE_FAIL:
       return {
         ...state,
-        onchain: { ...state.onchain, error: true }
+        onchain: { ...state.onchain, saving: false, error: true }
       }
 
     default:
@@ -122,7 +139,8 @@ export const actions = {
   saveHandleFail,
   saveOnChainHandle,
   saveOnChainHandleSuccess,
-  saveOnChainHandleFail
+  saveOnChainHandleFail,
+  saveOnChainHandleTxCompleted
 };
 
 export const actionTypes = {
@@ -137,7 +155,8 @@ export const actionTypes = {
   SAVE_HANDLE_FAIL,
   SAVE_ONCHAIN_HANDLE,
   SAVE_ONCHAIN_HANDLE_SUCCESS,
-  SAVE_ONCHAIN_HANDLE_FAIL
+  SAVE_ONCHAIN_HANDLE_FAIL,
+  SAVE_ONCHAIN_HANDLE_TX_COMPLETED
 };
 
 export default HandleReducer;

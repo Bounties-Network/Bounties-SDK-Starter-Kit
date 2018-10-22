@@ -8,17 +8,19 @@ import {
   ErrorModal,
   WrongNetwork
 } from './components';
-import { config } from '@bounties-network/modules';
-import { actions as authActions } from 'public-modules/Authentication';
-import {
+import { actions, selectors, config } from '@bounties-network/modules';
+
+const authActions = selectors.authentication
+const {
   getCurrentUserSelector,
   logoutStateSelector
-} from 'public-modules/Authentication/selectors';
-import {
+} = selectors.authentication;
+
+const {
   addressSelector,
   walletLockedSelector,
   hasWalletSelector
-} from 'public-modules/Client/selectors';
+} = selectors.client;
 
 const LoginLockComponent = props => {
   const {

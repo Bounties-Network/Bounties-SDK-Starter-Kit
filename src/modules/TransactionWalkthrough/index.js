@@ -1,14 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './TransactionWalkthrough.module.scss';
-import { Text, Modal, Button } from '@bountes-network/components';
+import { Text, Modal, Button } from '@bounties-network/components';
 
 const InitiateWalkthrough = props => {
   const { onClose, visible, onConfirm } = props;
 
   return (
     <Modal onClose={onClose} visible={visible} fixed size="small">
-      <Modal.Header icon={['fal', 'wallet']}>
+      <Modal.Header icon={['fas', 'wallet']}>
         <Modal.Message>Your wallet will take it from here!</Modal.Message>
       </Modal.Header>
       <Modal.Body>
@@ -56,7 +56,7 @@ PendingWalletConfirm.propTypes = {
 };
 
 const PendingReceipt = props => {
-  const { text, visible, toDashboard } = props;
+  const { text, visible, onClose } = props;
 
   return (
     <Modal visible={visible} fixed size="small">
@@ -69,8 +69,8 @@ const PendingReceipt = props => {
         <Modal.Description>{text}</Modal.Description>
       </Modal.Body>
       <Modal.Footer>
-        <Button type="primary" onClick={toDashboard}>
-          Go to Dashboard
+        <Button type="primary" onClick={onClose}>
+          Okay
         </Button>
       </Modal.Footer>
     </Modal>
@@ -80,7 +80,7 @@ const PendingReceipt = props => {
 PendingReceipt.propTypes = {
   text: PropTypes.string,
   visible: PropTypes.bool,
-  toDashboard: PropTypes.func
+  onClose: PropTypes.fn
 };
 
 const WalkthroughError = props => {
@@ -88,7 +88,7 @@ const WalkthroughError = props => {
 
   return (
     <Modal dismissable onClose={onClose} fixed size="small" visible={visible}>
-      <Modal.Header icon={['fal', 'exclamation-triangle']} closable />
+      <Modal.Header icon={['fas', 'exclamation-triangle']} closable />
       <Modal.Body>
         <Modal.Message>Something happened. Try again later.</Modal.Message>
       </Modal.Body>
@@ -104,21 +104,18 @@ WalkthroughError.propTypes = {
 };
 
 const WalkthroughSuccess = props => {
-  const { visible, toDashboard, buttonText, successLink } = props;
+  const { visible, onClose } = props;
 
   return (
     <Modal fixed size="small" visible={visible}>
-      <Modal.Header icon={['fal', 'check-circle']} />
+      <Modal.Header icon={['far', 'check-circle']} />
       <Modal.Body>
         <Modal.Message>Your transaction has been confirmed!</Modal.Message>
       </Modal.Body>
       <Modal.Footer>
-        <Button margin onClick={toDashboard}>
-          To Dashboard
+        <Button margin onClick={onClose}>
+          Close
         </Button>
-        <a href={successLink}>
-          <Button type="primary">{buttonText}</Button>
-        </a>
       </Modal.Footer>
     </Modal>
   );
@@ -130,7 +127,6 @@ const TransactionWalkthrough = props => {
     stage,
     onClose,
     onConfirm,
-    toDashboard,
     pendingReceiptText,
     pendingWalletText,
     transaction,
@@ -153,11 +149,11 @@ const TransactionWalkthrough = props => {
         visible={
           visible && !transaction.completed && stage === 'pendingReceipt'
         }
-        toDashboard={toDashboard}
+        onClose={onClose}
       />
       <WalkthroughSuccess
         visible={visible && transaction.completed && stage === 'pendingReceipt'}
-        toDashboard={toDashboard}
+        onClose={onClose}
         buttonText={transaction.linkText}
         successLink={successLink}
       />
@@ -180,7 +176,6 @@ TransactionWalkthrough.propTypes = {
   onClose: PropTypes.func,
   onDismiss: PropTypes.func,
   onConfirm: PropTypes.func,
-  toDashboard: PropTypes.func,
   pendingReceiptText: PropTypes.string,
   pendingWalletText: PropTypes.string
 };

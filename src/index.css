@@ -13,6 +13,8 @@ body {
 
 *, *:before, *:after {
   box-sizing: inherit;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 input, textarea {

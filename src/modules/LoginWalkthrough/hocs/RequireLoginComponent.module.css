@@ -1,16 +1,16 @@
-@import "~styles/variables.scss";
-
 .loginWrapper {
   height: 100%;
   width: 100%;
   position: relative;
 }
 
+/*
 :global(.modal-open):global(.unfixed) {
   .loginWrapper {
     position: fixed;
   }
 }
+*/
 
 .notLoggedInWrapper {
   display: flex;
@@ -20,12 +20,13 @@
 }
 
 .notLoggedIn {
-  margin: $s-spacing;
+  margin: 1em;
   max-width: 38rem;;
 }
 
+/*
 .notLoggedInCard {
-  padding: $l-spacing;
+  padding: 2em;
 
   button {
     @media only screen and (min-width: 48em) {
@@ -33,7 +34,8 @@
     }
   }
 }
+*/
 
 .subText {
-  margin: $l-spacing;
+  margin: 2em;
 }

@@ -4,26 +4,29 @@ import { connect } from 'react-redux';
 
 import './App.css';
 import Logo from './logo';
-import Login from '../LoginWalkthrough';
+import LoginWalkthrough from '../LoginWalkthrough';
 import { actions as handleActions } from '../modules/Handle';
+import { handleOnChainSelector } from '../modules/Handle/selectors';
 
+import TransactionWalkthrough from '../TransactionWalkthrough/hocs/TransactionWalkthrough';
+import FunctionalLoginLock from '../LoginWalkthrough/hocs/FunctionalLoginLock';
+import RequireLogin from '../LoginWalkthrough/hocs/RequireLoginComponent';
 import { actions as loginActions } from '../LoginWalkthrough/reducer';
-import { Button, Loader, Text, TextInput } from '@bounties-network/components';
+import { Button, Loader, Network, Text, ToastContainer, TextInput } from '@bounties-network/components';
 import { actions, selectors } from '@bounties-network/modules';
 
 
 const LoginComponent = props => {
-  const { loading, currentUser, showLogin } = props;
+  const { loading, currentUser, showLogin, initiateLoginProtection } = props;
 
   return (
-    <div>
-      <p className="logo"><Logo /></p>
-      <Text>
-        Welcome to the authentication demo
-      </Text>
+    <div className="group">
+      <h1 className="logo"><Logo /></h1>
+
+      <Text>Welcome to the authentication demo</Text>
       <Button
         type="primary"
-        onClick={() => showLogin(true)}
+        onClick={() => initiateLoginProtection(() => showLogin(true))}
         loading={loading}
       >
         Login
@@ -32,20 +35,20 @@ const LoginComponent = props => {
   );
 }
 
+const Login = compose()(LoginComponent)
+
 class ProtectedComponent extends React.Component {
-  state = { onchain: null, offchain: null };
+  state = { onchain: this.props.onChainHandleState.handle, offchain: null };
   onTextChange = (key, value) => { this.setState({ [key]: value }) }
 
   render() {
-    const { currentUser, logout, saveOnChain } = this.props;
+    const { currentUser, logoutUser, onChainHandleState, saveOnChain } = this.props;
     const { onchain, offchain } = this.state;
 
     return (
       <div className="group">
-        <p className="logo"><Logo /></p>
-        <Text>
-          Welcome, <code>{currentUser.public_address}</code>.
-        </Text>
+        <div className="logo"><Logo /></div>
+        <Text>Welcome, <code>{currentUser.public_address}</code>.</Text>
 
         <div className="form">
           <div className="text-input">
@@ -55,7 +58,7 @@ class ProtectedComponent extends React.Component {
               onChange={value => this.onTextChange('offchain', value)}
             />
           </div>
-          <Button className="button" type="action" onClick={logout}>
+          <Button className="button" type="action" onClick={logoutUser}>
             Save (off-chain)
           </Button>
         </div>
@@ -65,17 +68,24 @@ class ProtectedComponent extends React.Component {
             <TextInput
               placeholder="@ethBounties"
               value={onchain}
+              disabled={onChainHandleState.saving}
               onChange={value => this.onTextChange('onchain', value)}
             />
           </div>
-          <Button className="button" type="primary" onClick={() => saveOnChain(onchain)}>
+          <Button
+            className="button"
+            type="primary"
+            loading={onChainHandleState.saving}
+            disabled={onChainHandleState.saving}
+            onClick={() => saveOnChain(onchain)}>
             Save (on-chain)
           </Button>
         </div>
 
         <Button
           type="destructive"
-          onClick={logout}
+          loading={this.props.logoutState.loading}
+          onClick={logoutUser}
         >
           Logout
         </Button>
@@ -84,6 +94,7 @@ class ProtectedComponent extends React.Component {
   }
 }
 
+const Protected = compose(RequireLogin)(ProtectedComponent)
 
 class AppComponent extends Component {
   render() {
@@ -91,33 +102,43 @@ class AppComponent extends Component {
       loginState,
       clientInitialized,
       currentUser,
-      currentUserState
+      currentUserState,
+      hasWallet,
+      initiateWalkthrough,
+      onChainHandleState
     } = this.props;
 
     let content = '';
 
     if (currentUser) {
       content = (
-        <ProtectedComponent
+        <Protected
           currentUser={currentUser}
           loadOnChain={this.props.loadOnChain}
-          saveOnChain={this.props.saveOnChain}
-          logout={this.props.logout}
+          saveOnChain={handle => initiateWalkthrough(() => this.props.saveOnChain(handle))}
+          logoutUser={this.props.logoutUser}
+          logoutState={this.props.logoutState}
+          onChainHandleState={onChainHandleState}
         />
       )
     }
 
     if (!currentUser) {
       content = (
-        <LoginComponent
+        <Login
           loading={loginState.loading}
           currentUser={currentUser}
           showLogin={this.props.showLogin}
+          initiateLoginProtection={this.props.initiateLoginProtection}
         />
       );
     }
 
-    const isPageLoading = currentUserState.loading || !currentUserState.loaded || !clientInitialized
+    const isPageLoading = currentUserState.loading ||
+                          !currentUserState.loaded ||
+                          !clientInitialized ||
+                          onChainHandleState.loading
+
     if (isPageLoading) {
       content = (
         <div className="center">
@@ -128,36 +149,49 @@ class AppComponent extends Component {
 
     return (
       <React.Fragment>
+        <ToastContainer
+          newestOnTop
+          autoClose={false}
+          hideProgressBar
+          draggable
+        />
         <div className="center">
+          {!isPageLoading && hasWallet && <Network network={this.props.network} className="network" theme="light" />}
           {content}
         </div>
-        <Login/>
+        <LoginWalkthrough/>
       </React.Fragment>
     );
   }
 }
 
 const mapStateToProps = state => {
-  const loginState = selectors.authentication.loginStateSelector(state);
-  const currentUser = selectors.authentication.getCurrentUserSelector(state);
-  const currentUserState = selectors.authentication.getCurrentUserStateSelector(state);
-
-
   return {
-    loginState,
-    currentUser,
-    currentUserState,
+    onChainHandleState: handleOnChainSelector(state),
+    loginState: selectors.authentication.loginStateSelector(state),
+    logoutState: selectors.authentication.logoutStateSelector(state),
+    currentUser:selectors.authentication.getCurrentUserSelector(state),
+    currentUserState: selectors.authentication.getCurrentUserStateSelector(state),
+    hasWallet: selectors.client.hasWalletSelector(state),
+    network: selectors.client.networkSelector(state),
     clientInitialized: selectors.client.initializedSelector(state)
   };
 };
 
 const App = compose(
+  FunctionalLoginLock({
+  // wrapperClassName: styles.body
+  }),
+  TransactionWalkthrough({
+    dismissable: false,
+    // wrapperClassName: styles.body
+  }),
   connect(
     mapStateToProps,
     {
       showLogin: loginActions.showLogin,
       login: actions.authentication.login,
-      logout: actions.authentication.logout,
+      logoutUser: actions.authentication.logout,
       loadOnChain: handleActions.loadOnChainHandle,
       saveOnChain: handleActions.saveOnChainHandle
     }

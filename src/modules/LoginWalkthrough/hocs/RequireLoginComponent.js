@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { withRouter, Link } from 'react-router-dom';
-import styles from './RequireLoginComponent.module.scss';
-import { ZeroState, Card } from 'components';
-import { actions as loginActions } from 'containers/Login/reducer';
-import { getCurrentUserSelector } from 'public-modules/Authentication/selectors';
-import LoginLock from 'containers/Login/LoginLock';
+// import { withRouter, Link } from 'react-router-dom';
+import './RequireLoginComponent.module.css';
+import { ZeroState, Card } from '@bounties-network/components';
+import { actions as loginActions } from '../reducer';
+import { selectors } from '@bounties-network/modules';
+import LoginLock from '../LoginLock';
+
+const { getCurrentUserSelector } = selectors.authentication;
 
 function RequireLoginComponentHOC(WrappedComponent) {
   class RequireLoginComponent extends Component {
@@ -18,9 +20,9 @@ function RequireLoginComponentHOC(WrappedComponent) {
 
       if (!isLoggedIn) {
         return (
-          <div className={styles.notLoggedInWrapper}>
-            <div className={`${styles.notLoggedIn}`}>
-              <Card className={styles.notLoggedInCard}>
+          <div className="notLoggedInWrapper">
+            <div className="notLoggedIn">
+              <Card className="notLoggedInCard">
                 <Card.Body>
                   <ZeroState
                     title={'Sign in to use the Bounties Network'}
@@ -38,13 +40,13 @@ function RequireLoginComponentHOC(WrappedComponent) {
                         secure wallet.
                       </ZeroState.BodyText>
                     </div>
-                    <div className={styles.subText}>
+                    <div className="subText">
                       <ZeroState.BodyText>
                         If you don&#39;t wish to sign in but want to explore,
                         feel free to check out some bounties using the{' '}
                       </ZeroState.BodyText>
                       <ZeroState.BodyText>
-                        <Link to="/explorer">explorer</Link>
+                        {/*<Link to="/explorer">explorer</Link>*/}
                       </ZeroState.BodyText>
                       <ZeroState.BodyText>.</ZeroState.BodyText>
                     </div>
@@ -57,7 +59,7 @@ function RequireLoginComponentHOC(WrappedComponent) {
       }
 
       return (
-        <div className={styles.loginWrapper}>
+        <div className="loginWrapper">
           <LoginLock />
           <WrappedComponent {...this.props} />
         </div>
@@ -74,7 +76,7 @@ function RequireLoginComponentHOC(WrappedComponent) {
     isLoggedIn: !!getCurrentUserSelector(state)
   });
   return compose(
-    withRouter,
+    // withRouter,
     connect(
       mapStateToProps,
       { showLogin: loginActions.showLogin }

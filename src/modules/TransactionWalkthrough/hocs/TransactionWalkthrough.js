@@ -2,31 +2,23 @@ import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { curry } from 'lodash';
-import { TransactionWalkthrough } from '../';
-import { actions } from 'public-modules/Transaction';
-import {
+import TransactionWalkthrough from '../';
+import { actions, selectors } from '@bounties-network/modules';
+// import { withRouter } from 'react-router-dom';
+
+const {
   rootTransactionSelector,
   pendingReceiptHashSelector,
   getTransactionSelector
-} from 'public-modules/Transaction/selectors';
-
-import { withRouter } from 'react-router-dom';
+} = selectors.transaction
 
 function TransactionWalkthroughHOC(config, WrappedComponent) {
   class TransactionWalkthroughComponent extends React.Component {
-    state = {
-      onConfirm: () => {}
-    };
+    state = { onConfirm: () => {} };
 
     initiateWalkthrough = onConfirm => {
       const { initiateWalkthrough } = this.props;
-
-      this.setState(
-        {
-          onConfirm
-        },
-        () => initiateWalkthrough()
-      );
+      this.setState({ onConfirm }, () => initiateWalkthrough());
     };
 
     componentWillUnmount() {
@@ -51,10 +43,6 @@ function TransactionWalkthroughHOC(config, WrappedComponent) {
             stage={stage}
             onClose={onClose}
             onConfirm={onConfirm}
-            toDashboard={() => {
-              onClose();
-              history.push('/dashboard');
-            }}
             transaction={transaction}
             dismissable={config.dismissable}
             pendingReceiptText={config.pendingReceiptText}
@@ -83,12 +71,12 @@ function TransactionWalkthroughHOC(config, WrappedComponent) {
   };
 
   return compose(
-    withRouter,
+    // withRouter,
     connect(
       mapStateToProps,
       {
-        initiateWalkthrough: actions.initiateWalkthrough,
-        onClose: actions.closeWalkthrough
+        initiateWalkthrough: actions.transaction.initiateWalkthrough,
+        onClose: actions.transaction.closeWalkthrough
       }
     )
   )(TransactionWalkthroughComponent);

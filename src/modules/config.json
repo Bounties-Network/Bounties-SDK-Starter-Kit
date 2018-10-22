@@ -1,6 +1,9 @@
 {
+	"url": {
+    	"rinkeby": "http://localhost:8000"
+  	},
 	"deployments": {
-		"directory": { "rinkeby": "0xb45c55d36d29db293a3e5c6d2f54e882486f0415" }
+		"directory": { "rinkeby": "0x226b2c731bcccba3c3e9e73615bc61faf9801313" }
 	},
 	"interfaces": {
 		"directory": [
@@ -8,7 +11,7 @@
 				"constant": false,
 				"inputs": [
 					{
-						"name": "_handle",
+						"name": "handle",
 						"type": "string"
 					}
 				],
@@ -20,11 +23,16 @@
 			},
 			{
 				"constant": true,
-				"inputs": [],
-				"name": "getHandle",
+				"inputs": [
+					{
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "handles",
 				"outputs": [
 					{
-						"name": "_handle",
+						"name": "",
 						"type": "string"
 					}
 				],

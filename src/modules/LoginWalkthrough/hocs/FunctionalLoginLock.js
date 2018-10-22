@@ -2,20 +2,23 @@ import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { curry } from 'lodash';
-import siteConfig from 'public-modules/config';
-import FunctionalLoginLock from '../containers/Login/FunctionalLoginLock';
-import { actions } from '../containers/Login/reducer';
+// import siteConfig from '../../config';
+import FunctionalLoginLock from '../FunctionalLoginLock';
+import { actions } from '../reducer';
 import { actions as moduleActions, selectors} from '@bounties-network/modules';
-import { rootLoginSelector } from '../containers/Login/selectors';
+import { rootLoginSelector } from '../selectors';
 
 const {
   addressSelector,
   walletLockedSelector,
   hasWalletSelector
-  getCurrentUserSelector,
+} = selectors.client;
+
+const {
+    getCurrentUserSelector,
   loginStateSelector,
   logoutStateSelector
-} = selectors;
+} = selectors.authentication
 
 function FunctionalLoginLockHOC(config, WrappedComponent) {
   class FunctionalLoginLockComponent extends React.Component {
@@ -67,6 +70,8 @@ function FunctionalLoginLockHOC(config, WrappedComponent) {
         ...rest
       } = this.props;
 
+      console.log(this.props)
+
       return (
         <div className={config.wrapperClassName}>
           <WrappedComponent
@@ -105,14 +110,11 @@ function FunctionalLoginLockHOC(config, WrappedComponent) {
     const hasWallet = hasWalletSelector(state);
     const walletLocked = walletLockedSelector(state);
     const currentAddress = addressSelector(state);
-    const addressMismatch =
-      user && addressSelector(state).toLowerCase() !== user.public_address;
+    const addressMismatch = user && addressSelector(state).toLowerCase() !== user.public_address;
     const visible = rootLogin.functionalVisible;
     const isLoggedIn = !!user;
     const network = state.client.network;
-    const isCorrectNetwork = siteConfig.requiredNetwork
-      ? network === siteConfig.requiredNetwork
-      : network === 'mainNet' || network === 'rinkeby';
+    const isCorrectNetwork = network === 'rinkeby';
     const callbackCanTrigger =
       hasWallet &&
       !walletLocked &&
