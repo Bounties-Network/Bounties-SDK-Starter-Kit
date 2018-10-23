@@ -83,7 +83,7 @@ class LoginLockComponent extends React.Component {
           currentAddress={walletAddress}
           previousAddress={userAddress}
           img={img}
-          logout={()=>{console.log('logging out', logout);logout()}}
+          logout={logout}
           loggingOut={loggingOut}
           pageLevel
         />

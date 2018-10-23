@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Text, Button, Avatar } from '@bounties-network/components';
+import config from '@bounties-network/modules';
 import { shortenAddress } from './../utils/helpers';
 import './baseStyles.css';
 
@@ -33,7 +34,7 @@ const AddressMismatch = props => {
         <Modal.Description>
           <Text inline>You were previously signed in to </Text>
           <Text inline weight="fontWeight-bold">
-            bounties.network
+            {config.settings.networkName}
           </Text>
           <Text inline> using the following address:</Text>
           <div>
@@ -53,8 +54,9 @@ const AddressMismatch = props => {
             {shortenAddress(currentAddress)}
           </Text>
           <Text inline>
-            . Please switch your wallet account, or log out of the Bounties
-            Network and sign in using a different address.
+            . Please switch your wallet account, or log out of
+            {' ' + config.settings.networkName} and sign in using
+            a different address.
           </Text>
         </Modal.Description>
       </Modal.Body>
