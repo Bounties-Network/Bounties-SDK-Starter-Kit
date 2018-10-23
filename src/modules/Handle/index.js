@@ -1,6 +1,6 @@
 import { actionTypes as modulesActionTypes } from '@bounties-network/modules';
 
-const { SET_ADDRESS } = modulesActionTypes.client;
+const { GET_CURRENT_USER_SUCCESS, LOGIN_SUCCESS } = modulesActionTypes.authentication;
 const defaultHandleState = {
   loading: false,
   error: false,
@@ -49,7 +49,8 @@ const saveOnChainHandleFail        = error  => ({ type: SAVE_ONCHAIN_HANDLE_FAIL
 
 function HandleReducer(state = initialState, action) {
   switch (action.type) {
-    case SET_ADDRESS:
+    case LOGIN_SUCCESS:
+    case GET_CURRENT_USER_SUCCESS:
       return {
         ...state,
         offchain: { ...state.offchain, loading: true, error: false },
@@ -64,18 +65,18 @@ function HandleReducer(state = initialState, action) {
     case LOAD_HANDLE_SUCCESS:
       return {
         ...state,
-        offchain: { ...state.offchain, handle: action.handle }
+        offchain: { ...defaultHandleState, handle: action.handle }
       }
     case LOAD_HANDLE_FAIL:
       return {
         ...state,
-        offchain: { ...state.offchain, error: true }
+        offchain: { ...defaultHandleState, error: true }
       }
 
     case LOAD_ONCHAIN_HANDLE:
       return {
         ...state,
-        onchain: { ...state.onchain, loading: true, saveError: false }
+        onchain: { ...defaultHandleState, loading: true, error: false }
       }
     case LOAD_ONCHAIN_HANDLE_SUCCESS:
       return {
@@ -85,21 +86,24 @@ function HandleReducer(state = initialState, action) {
     case LOAD_ONCHAIN_HANDLE_FAIL:
       return {
         ...state,
-        onchain: { ...state.onchain, loading: false, saveError: true }
+        onchain: { ...defaultHandleState, loading: false, error: true }
       }
 
-    // case LOAD_HANDLE: {
-    //   ...state,
-    //   offchain: { ...state.offchain, loading: true, error: false }
-    // }
-    // case LOAD_HANDLE_SUCCESS: {
-    //   ...state,
-    //   offchain: { ...state.offchain, handle: action.handle }
-    // }
-    // case LOAD_HANDLE_FAIL: {
-    //   ...state,
-    //   offchain: { ...state.offchain, error: true }
-    // }
+    case SAVE_HANDLE:
+      return {
+        ...state,
+        offchain: { ...state.offchain, saving: true, error: false }
+      }
+    case SAVE_HANDLE_SUCCESS:
+      return {
+        ...state,
+        offchain: { ...defaultHandleState, handle: action.handle }
+      }
+    case SAVE_HANDLE_FAIL:
+      return {
+        ...state,
+        offchain: { ...state.offchain, saving: false, error: true }
+      }
 
     case SAVE_ONCHAIN_HANDLE:
       return {

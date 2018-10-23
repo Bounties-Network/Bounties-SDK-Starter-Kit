@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Text, Button, Avatar } from '@bounties-network/components';
 import { shortenAddress } from './../utils/helpers';
-import styles from './baseStyles.module.scss';
+import './baseStyles.module.css';
 
 const AddressMismatch = props => {
   const {
@@ -38,7 +38,7 @@ const AddressMismatch = props => {
           <Text inline> using the following address:</Text>
           <div>
             <Avatar
-              className={styles.avatar}
+              className="avatar"
               size="small"
               img={img}
               hash={previousAddress}

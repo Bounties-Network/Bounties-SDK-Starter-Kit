@@ -8,9 +8,9 @@ import {
   ErrorModal,
   WrongNetwork
 } from './components';
-import { actions, selectors, config } from '@bounties-network/modules';
+import modulesConfig, { actions, selectors } from '@bounties-network/modules';
 
-const authActions = selectors.authentication
+const authActions = actions.authentication
 const {
   getCurrentUserSelector,
   logoutStateSelector
@@ -22,67 +22,75 @@ const {
   hasWalletSelector
 } = selectors.client;
 
-const LoginLockComponent = props => {
-  const {
-    walletLocked,
-    walletAddress,
-    userAddress,
-    img,
-    logout,
-    loggingOut,
-    resetLogoutState,
-    network,
-    isCorrectNetwork,
-    error
-  } = props;
-
-  const config = {
-    showUnlockWallet: false,
-    showError: false,
-    showMismatch: false,
-    showWrongNetwork: false
-  };
-
-  if (walletLocked || !walletAddress) {
-    config.showUnlockWallet = true;
-  } else if (error) {
-    config.showError = true;
-  } else if (!isCorrectNetwork) {
-    config.showWrongNetwork = true;
-  } else if (
-    userAddress &&
-    userAddress.toLowerCase() !== walletAddress.toLowerCase()
-  ) {
-    config.showMismatch = true;
+class LoginLockComponent extends React.Component {
+  componentDidMount() {
+    if (window.ethereum) {
+      window.ethereum.enable();
+    }
   }
 
-  return (
-    <React.Fragment>
-      <UnlockWallet
-        visible={config.showUnlockWallet}
-        pageLevel
-        closable={false}
-      />
-      <WrongNetwork
-        visible={config.showWrongNetwork}
-        pageLevel
-        network={network}
-        closable={false}
-      />
-      <ErrorModal visible={config.showError} onClose={resetLogoutState} />
-      <AddressMismatch
-        closable={false}
-        visible={config.showMismatch}
-        currentAddress={walletAddress}
-        previousAddress={userAddress}
-        img={img}
-        logout={logout}
-        loggingOut={loggingOut}
-        pageLevel
-      />
-    </React.Fragment>
-  );
-};
+  render() {
+    const {
+      walletLocked,
+      walletAddress,
+      userAddress,
+      img,
+      logout,
+      loggingOut,
+      resetLogoutState,
+      network,
+      isCorrectNetwork,
+      error
+    } = this.props;
+
+    const config = {
+      showUnlockWallet: false,
+      showError: false,
+      showMismatch: false,
+      showWrongNetwork: false
+    };
+
+    if (walletLocked || !walletAddress) {
+      config.showUnlockWallet = true;
+    } else if (error) {
+      config.showError = true;
+    } else if (!isCorrectNetwork) {
+      config.showWrongNetwork = true;
+    } else if (
+      userAddress &&
+      userAddress.toLowerCase() !== walletAddress.toLowerCase()
+    ) {
+      config.showMismatch = true;
+    }
+
+    return (
+      <React.Fragment>
+        <UnlockWallet
+          visible={config.showUnlockWallet}
+          pageLevel
+          closable={false}
+        />
+        <WrongNetwork
+          visible={config.showWrongNetwork}
+          pageLevel
+          network={network}
+          closable={false}
+        />
+        <ErrorModal visible={config.showError} onClose={resetLogoutState} />
+        <AddressMismatch
+          closable={false}
+          visible={config.showMismatch}
+          currentAddress={walletAddress}
+          previousAddress={userAddress}
+          img={img}
+          logout={()=>{console.log('logging out', logout);logout()}}
+          loggingOut={loggingOut}
+          pageLevel
+        />
+      </React.Fragment>
+    );
+  }
+}
 
 const mapStateToProps = state => {
   const user = getCurrentUserSelector(state);
@@ -95,8 +103,8 @@ const mapStateToProps = state => {
     walletAddress: addressSelector(state),
     userAddress: user && user.public_address,
     network: network,
-    isCorrectNetwork: config.requiredNetwork
-      ? network === config.requiredNetwork
+    isCorrectNetwork: modulesConfig.settings.requiredNetwork
+      ? network === modulesConfig.settings.requiredNetwork
       : network === 'mainNet' || network === 'rinkeby',
     img: user && user.small_profile_image_url,
     error: logoutState.error,

@@ -38,6 +38,15 @@ function FunctionalLoginLockHOC(config, WrappedComponent) {
     };
 
     componentDidUpdate(prevProps) {
+      if (
+        !prevProps.visible &&
+        this.props.visible &&
+        this.props.walletLocked &&
+        window.ethereum
+      ) {
+        window.ethereum.enable();
+      }
+
       if (!prevProps.callbackCanTrigger && this.props.callbackCanTrigger) {
         this.props.showFunctionalLock(false);
         this.state.onConfirm();
@@ -69,8 +78,6 @@ function FunctionalLoginLockHOC(config, WrappedComponent) {
         isCorrectNetwork,
         ...rest
       } = this.props;
-
-      console.log(this.props)
 
       return (
         <div className={config.wrapperClassName}>

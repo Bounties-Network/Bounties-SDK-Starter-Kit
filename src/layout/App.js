@@ -4,20 +4,20 @@ import { connect } from 'react-redux';
 
 import './App.css';
 import Logo from './logo';
-import LoginWalkthrough from '../LoginWalkthrough';
+import LoginWalkthrough from '../modules/LoginWalkthrough';
 import { actions as handleActions } from '../modules/Handle';
-import { handleOnChainSelector } from '../modules/Handle/selectors';
+import { handleSelector, handleOnChainSelector } from '../modules/Handle/selectors';
 
-import TransactionWalkthrough from '../TransactionWalkthrough/hocs/TransactionWalkthrough';
-import FunctionalLoginLock from '../LoginWalkthrough/hocs/FunctionalLoginLock';
-import RequireLogin from '../LoginWalkthrough/hocs/RequireLoginComponent';
-import { actions as loginActions } from '../LoginWalkthrough/reducer';
+import TransactionWalkthrough from '../modules/TransactionWalkthrough/hocs/TransactionWalkthrough';
+import FunctionalLoginLock from '../modules/LoginWalkthrough/hocs/FunctionalLoginLock';
+import RequireLogin from '../modules/LoginWalkthrough/hocs/RequireLoginComponent';
+import { actions as loginActions } from '../modules/LoginWalkthrough/reducer';
 import { Button, Loader, Network, Text, ToastContainer, TextInput } from '@bounties-network/components';
 import { actions, selectors } from '@bounties-network/modules';
 
 
 const LoginComponent = props => {
-  const { loading, currentUser, showLogin, initiateLoginProtection } = props;
+  const { loading, showLogin, initiateLoginProtection } = props;
 
   return (
     <div className="group">
@@ -38,11 +38,23 @@ const LoginComponent = props => {
 const Login = compose()(LoginComponent)
 
 class ProtectedComponent extends React.Component {
-  state = { onchain: this.props.onChainHandleState.handle, offchain: null };
+  state = {
+    onchain: this.props.onChainHandleState.handle,
+    offchain: this.props.offChainHandleState.handle
+  };
+
   onTextChange = (key, value) => { this.setState({ [key]: value }) }
 
   render() {
-    const { currentUser, logoutUser, onChainHandleState, saveOnChain } = this.props;
+    const {
+      currentUser,
+      logoutUser,
+      offChainHandleState,
+      onChainHandleState,
+      saveOnChain,
+      saveOffChain
+    } = this.props;
+
     const { onchain, offchain } = this.state;
 
     return (
@@ -55,10 +67,17 @@ class ProtectedComponent extends React.Component {
             <TextInput
               placeholder="@ethBounties"
               value={offchain}
+              disabled={offChainHandleState.saving}
               onChange={value => this.onTextChange('offchain', value)}
             />
           </div>
-          <Button className="button" type="action" onClick={logoutUser}>
+          <Button
+            className="button"
+            type="action"
+            loading={offChainHandleState.saving}
+            disabled={offChainHandleState.saving}
+            onClick={() => saveOffChain(offchain)}
+          >
             Save (off-chain)
           </Button>
         </div>
@@ -105,7 +124,8 @@ class AppComponent extends Component {
       currentUserState,
       hasWallet,
       initiateWalkthrough,
-      onChainHandleState
+      onChainHandleState,
+      offChainHandleState
     } = this.props;
 
     let content = '';
@@ -114,11 +134,12 @@ class AppComponent extends Component {
       content = (
         <Protected
           currentUser={currentUser}
-          loadOnChain={this.props.loadOnChain}
           saveOnChain={handle => initiateWalkthrough(() => this.props.saveOnChain(handle))}
+          saveOffChain={this.props.saveOffChain}
           logoutUser={this.props.logoutUser}
           logoutState={this.props.logoutState}
           onChainHandleState={onChainHandleState}
+          offChainHandleState={offChainHandleState}
         />
       )
     }
@@ -137,7 +158,8 @@ class AppComponent extends Component {
     const isPageLoading = currentUserState.loading ||
                           !currentUserState.loaded ||
                           !clientInitialized ||
-                          onChainHandleState.loading
+                          onChainHandleState.loading ||
+                          offChainHandleState.loading
 
     if (isPageLoading) {
       content = (
@@ -149,13 +171,13 @@ class AppComponent extends Component {
 
     return (
       <React.Fragment>
-        <ToastContainer
-          newestOnTop
-          autoClose={false}
-          hideProgressBar
-          draggable
-        />
         <div className="center">
+          <ToastContainer
+            newestOnTop
+            autoClose={false}
+            hideProgressBar
+            draggable
+          />
           {!isPageLoading && hasWallet && <Network network={this.props.network} className="network" theme="light" />}
           {content}
         </div>
@@ -167,6 +189,7 @@ class AppComponent extends Component {
 
 const mapStateToProps = state => {
   return {
+    offChainHandleState: handleSelector(state),
     onChainHandleState: handleOnChainSelector(state),
     loginState: selectors.authentication.loginStateSelector(state),
     logoutState: selectors.authentication.logoutStateSelector(state),
@@ -192,8 +215,8 @@ const App = compose(
       showLogin: loginActions.showLogin,
       login: actions.authentication.login,
       logoutUser: actions.authentication.logout,
-      loadOnChain: handleActions.loadOnChainHandle,
-      saveOnChain: handleActions.saveOnChainHandle
+      saveOnChain: handleActions.saveOnChainHandle,
+      saveOffChain: handleActions.saveHandle,
     }
   )
 )(AppComponent);

@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { curry } from 'lodash';
 import TransactionWalkthrough from '../';
 import { actions, selectors } from '@bounties-network/modules';
-// import { withRouter } from 'react-router-dom';
 
 const {
   rootTransactionSelector,
@@ -29,7 +28,6 @@ function TransactionWalkthroughHOC(config, WrappedComponent) {
       const {
         visible,
         stage,
-        history,
         onClose,
         transaction
       } = this.props;

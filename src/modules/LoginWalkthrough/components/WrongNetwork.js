@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { config } from '@bounties-network/modules';
 import { Modal, Text, Button } from '@bounties-network/components';
-
 const WrongNetwork = props => {
   const { visible, onClose, pageLevel, closable } = props;
 
@@ -20,11 +19,11 @@ const WrongNetwork = props => {
       </Modal.Header>
       <Modal.Body>
         <Modal.Description>
-          {config.networkName} is currently operational on
-          {config.requiredNetwork ? (
+          {config.settings.networkName} is currently operational on
+          {config.settings.requiredNetwork ? (
             <Text weight="fontWeight-bold" inline>
               {' '}
-              {config.requiredNetwork}.
+              {config.settings.requiredNetwork}.
             </Text>
           ) : (
             <div>

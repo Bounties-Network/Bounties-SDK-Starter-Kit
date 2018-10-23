@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styles from './TransactionWalkthrough.module.scss';
+import './TransactionWalkthrough.module.css';
 import { Text, Modal, Button } from '@bounties-network/components';
 
 const InitiateWalkthrough = props => {
@@ -13,7 +13,7 @@ const InitiateWalkthrough = props => {
       </Modal.Header>
       <Modal.Body>
         <Modal.Description>
-          <Text className={styles.textBreak}>
+          <Text className="textBreak">
             After clicking &quot;OK &quot;, a wallet dialogue will prompt you to
             confirm your Ethereum transaction and pay a small amount of ETH (for
             gas fees).
@@ -80,7 +80,7 @@ const PendingReceipt = props => {
 PendingReceipt.propTypes = {
   text: PropTypes.string,
   visible: PropTypes.bool,
-  onClose: PropTypes.fn
+  onClose: PropTypes.func
 };
 
 const WalkthroughError = props => {
@@ -181,10 +181,8 @@ TransactionWalkthrough.propTypes = {
 };
 
 TransactionWalkthrough.defaultProps = {
-  pendingReceiptText:
-    'Your transaction is being processed. We will notify you once it is confirmed.',
-  pendingWalletText:
-    'Confirming Ethereum transaction with your enabled wallet. This may take a few seconds.'
+  pendingReceiptText: 'Your transaction is being processed. We will notify you once it is confirmed.',
+  pendingWalletText: 'Confirming Ethereum transaction with your enabled wallet. This may take a few seconds.'
 };
 
 export default TransactionWalkthrough;

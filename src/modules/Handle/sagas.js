@@ -1,14 +1,16 @@
+import React from 'react';
 import { actions as modulesActions, actionTypes as modulesActionTypes, selectors, request, sagas, helpers } from '@bounties-network/modules';
 import { call, put, takeLatest, select } from 'redux-saga/effects';
 import { actionTypes, actions } from './';
 import { handleOnChainSelector } from './selectors';
 import config from '../config.json';
+import { toast as callToast } from 'react-toastify';
+import { Toast } from '@bounties-network/components';
 
 const {
-  LOAD_HANDLE,
-  LOAD_ONCHAIN_HANDLE,
   SAVE_HANDLE,
-  SAVE_ONCHAIN_HANDLE
+  SAVE_ONCHAIN_HANDLE,
+  SAVE_HANDLE_SUCCESS
 } = actionTypes;
 
 const {
@@ -24,35 +26,39 @@ const {
 } = actions;
 
 const { setPendingWalletConfirm, setPendingReceipt, setTransactionError } = modulesActions.transaction;
-const { getContractClient, getWeb3Client, getWalletAddress } = sagas.client;
-const { promisify, promisifyContractCall } = helpers;
-const { SET_TRANSACTION_COMPLETED } = modulesActionTypes.transaction;
-const { SET_ADDRESS } = modulesActionTypes.client;
+const { getContractClient, getWeb3Client } = sagas.client;
+const { promisifyContractCall } = helpers;
+const { ADD_TRANSACTION, SET_TRANSACTION_COMPLETED } = modulesActionTypes.transaction;
+const { GET_CURRENT_USER_SUCCESS, LOGIN_SUCCESS } = modulesActionTypes.authentication;
+const { getTransactionSelector, transactionsInitiatedSelector } = selectors.transaction;
+const { networkSelector } = selectors.client
+
+
+function* getUserAddress() {
+  const { proxiedWeb3 } = yield call(getWeb3Client)
+  const accounts = yield proxiedWeb3.eth.getAccounts();
+  return accounts[0];
+}
 
 export function* loadHandle(action) {
-  const { bountyId } = action;
+  if (action.type === GET_CURRENT_USER_SUCCESS && !action.user) {
+    yield put(loadHandleFail());
+  }
 
-  // try {  const directoryContract = yield call(
-  //   getContractClient,
-  //   config.deployments.directory,
-  //   config.interfaces.directory
-  // );
-  //   const endpoint = `bounty/${bountyId}/comment/?limit=${LIMIT}`;
-  //   const comments = yield call(request, endpoint, 'GET');
-
-  //   yield put(loadCommentsSuccess(comments.results, comments.count));
-  // } catch (e) {
-  //   yield put(loadCommentsFail(e));
-  // }
+  try {
+    yield put(loadHandleSuccess(action.user.username));
+  } catch (e) {
+    yield put(loadHandleFail(e));
+  }
 }
 
 export function* loadOnChainHandle(action) {
-  try {
-    const { proxiedWeb3 } = yield call(getWeb3Client)
-    const accounts = yield proxiedWeb3.eth.getAccounts();
-    const userAddress = accounts[0];
+  if (action.type === GET_CURRENT_USER_SUCCESS && !action.user) {
+    yield put(loadOnChainHandleFail());
+  }
 
-    console.log(userAddress)
+  try {
+    const userAddress = yield getUserAddress();
 
     const directoryContract = yield call(
       getContractClient,
@@ -60,11 +66,7 @@ export function* loadOnChainHandle(action) {
       config.interfaces.directory
     );
 
-    console.log(directoryContract)
-
-    console.log('prepping call')
     const result = yield call(directoryContract.handles(userAddress).call)
-    console.log('result', result, typeof result);
 
     yield put(loadOnChainHandleSuccess(result));
   } catch (e) {
@@ -73,20 +75,20 @@ export function* loadOnChainHandle(action) {
   }
 }
 
+export function* saveHandle(action) {
+  const { handle } = action;
 
-// export function* postNewComment(action) {
-//   const { bountyId, text } = action;
+  try {
+    const userAddress = yield getUserAddress();
+    let endpoint = `user/${userAddress}/`;
+    const result = yield call(request, endpoint, 'PUT', { data: { username: handle } });
 
-//   try {
-//     let endpoint = `bounty/${bountyId}/comment/`;
-//     const comment = yield call(request, endpoint, 'POST', { data: { text } });
-
-//     yield put(postCommentSuccess(comment));
-//   } catch (e) {
-//     console.log(e);
-//     yield put(postCommentFail(e));
-//   }
-// }
+    yield put(saveHandleSuccess(result.username));
+  } catch (e) {
+    console.log(e);
+    yield put(saveHandleFail(e));
+  }
+}
 
 export function* saveOnchainHandle(action) {
   const { handle } = action;
@@ -121,20 +123,65 @@ export function* checkTransactionHash(action) {
   const { txHash } = action;
   const onChainHandleState = yield select(handleOnChainSelector);
 
-  console.log(txHash, onChainHandleState)
-
   if (txHash === onChainHandleState.txHash) {
     yield put(saveOnChainHandleTxCompleted());
   }
+}
 
+let pendingToasts = {};
+export function* showTransactionNotification(action) {
+  let txHash = 'offchain';
+  let postedLink = '';
+  let postedMessage = 'Handle saved successfully to server';
+  let toastType = Toast.TYPE.SUCCESS;
+
+  if (action.type !== SAVE_HANDLE_SUCCESS) {
+    txHash = action.txHash;
+
+    const transactionsInitiated = yield select(transactionsInitiatedSelector);
+    if (!transactionsInitiated) {
+      return null;
+    }
+
+    const currentTransaction = yield select(getTransactionSelector(txHash));
+
+    const network = yield select(networkSelector);
+    const baseUrl = network === 'mainNet' ? 'https://etherscan.io/tx/' : 'https://rinkeby.etherscan.io/tx/';
+
+    postedLink = (
+      <a href={baseUrl + txHash} target="_blank" without rel="noopener noreferrer" style={{ color: 'inherit' }}>
+        View on etherscan
+      </a>
+    );
+
+    postedMessage = 'Transaction complete';
+    toastType = Toast.TYPE.SUCCESS;
+
+    if (!currentTransaction.completed) {
+      postedMessage = 'Processing transaction';
+      toastType = Toast.TYPE.TRANSACTION;
+    }
+  }
+
+  const prevToastID = pendingToasts[txHash];
+  if (prevToastID) {
+    callToast.dismiss(prevToastID);
+  }
+
+  const id = yield call(Toast, toastType, postedMessage, postedLink);
+  pendingToasts[txHash] = id;
 }
 
 export function* watchLoadHandle() {
-  yield takeLatest(SET_ADDRESS, loadHandle);
+  yield takeLatest([GET_CURRENT_USER_SUCCESS, LOGIN_SUCCESS], loadHandle);
 }
 
 export function* watchLoadOnChainHandle() {
-  yield takeLatest(SET_ADDRESS, loadOnChainHandle);
+  yield takeLatest([GET_CURRENT_USER_SUCCESS, LOGIN_SUCCESS], loadOnChainHandle);
+}
+
+export function* watchSaveHandle() {
+  yield takeLatest(SAVE_HANDLE, saveHandle)
 }
 
 export function* watchSaveHandleOnChain() {
@@ -145,13 +192,23 @@ export function* watchCompletedTransactions() {
   yield takeLatest(SET_TRANSACTION_COMPLETED, checkTransactionHash);
 }
 
+export function* watchForTransactionToasts() {
+  yield takeLatest(
+    [ADD_TRANSACTION, SET_TRANSACTION_COMPLETED, SAVE_HANDLE_SUCCESS],
+    showTransactionNotification
+  );
+}
+
+
 // export function* watchPostComment() {
 //   yield takeLatest(POST_COMMENT, postNewComment);
 // }
 
 export default [
   watchLoadHandle,
+  watchSaveHandle,
   watchSaveHandleOnChain,
   watchLoadOnChainHandle,
-  watchCompletedTransactions
+  watchCompletedTransactions,
+  watchForTransactionToasts
 ];

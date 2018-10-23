@@ -14,8 +14,6 @@ import { actions } from './reducer';
 
 import { actions as moduleActions, selectors } from '@bounties-network/modules';
 
-console.log(selectors.authentication)
-
 const {
   getCurrentUserSelector,
   loginStateSelector,
@@ -28,67 +26,75 @@ const {
   hasWalletSelector
 } = selectors.client;
 
-const LoginComponent = props => {
-  const {
-    visible,
-    stage,
-    hasWallet,
-    walletLocked,
-    showLogin,
-    login,
-    signingIn,
-    resetLoginState,
-    resetLogoutState,
-    loginError,
-    logoutError,
-    loggedIn
-  } = props;
 
-  const config = {
-    showWalletRequired: false,
-    showUnlockWallet: false,
-    showErrorModal: false,
-    showSigningIn: false,
-    showSignIn: false
-  };
-
-  if (visible) {
-    if (!hasWallet) {
-      config.showWalletRequired = true;
-    } else if (walletLocked) {
-      config.showUnlockWallet = true;
-    } else if (loginError || logoutError) {
-      config.showErrorModal = true;
-    } else if (signingIn || loggedIn) {
-      config.showSigningIn = true;
-    } else {
-      config.showSignIn = true;
+class LoginComponent extends React.Component {
+  componentDidUpdate(prevProps) {
+    if (!prevProps.visible && this.props.visible && window.ethereum) {
+      window.ethereum.enable();
     }
   }
 
-  return (
-    <React.Fragment>
-      <WalletRequired
-        visible={config.showWalletRequired}
-        onClose={() => showLogin(false)}
-      />
-      <UnlockWallet
-        visible={config.showUnlockWallet}
-        onClose={() => showLogin(false)}
-      />
-      <ErrorModal
-        visible={config.showErrorModal}
-        onClose={loginError ? resetLoginState : resetLogoutState}
-      />
-      <SigningIn visible={config.showSigningIn} />
-      <SignIn
-        visible={config.showSignIn}
-        onClose={() => showLogin(false)}
-        signIn={login}
-      />
-    </React.Fragment>
-  );
-};
+  render() {
+    const {
+      visible,
+      hasWallet,
+      walletLocked,
+      showLogin,
+      login,
+      signingIn,
+      resetLoginState,
+      resetLogoutState,
+      loginError,
+      logoutError,
+      loggedIn
+    } = this.props;
+
+    const config = {
+      showWalletRequired: false,
+      showUnlockWallet: false,
+      showErrorModal: false,
+      showSigningIn: false,
+      showSignIn: false
+    };
+
+    if (visible) {
+      if (!hasWallet) {
+        config.showWalletRequired = true;
+      } else if (walletLocked) {
+        config.showUnlockWallet = true;
+      } else if (loginError || logoutError) {
+        config.showErrorModal = true;
+      } else if (signingIn || loggedIn) {
+        config.showSigningIn = true;
+      } else {
+        config.showSignIn = true;
+      }
+    }
+
+    return (
+      <React.Fragment>
+        <WalletRequired
+          visible={config.showWalletRequired}
+          onClose={() => showLogin(false)}
+        />
+        <UnlockWallet
+          visible={config.showUnlockWallet}
+          onClose={() => showLogin(false)}
+        />
+        <ErrorModal
+          visible={config.showErrorModal}
+          onClose={loginError ? resetLoginState : resetLogoutState}
+        />
+        <SigningIn visible={config.showSigningIn} />
+        <SignIn
+          visible={config.showSignIn}
+          onClose={() => showLogin(false)}
+          signIn={login}
+        />
+      </React.Fragment>
+    );
+  }
+}
 
 const mapStateToProps = state => {
   const rootLogin = rootLoginSelector(state);
