@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Text, Button, Avatar } from '@bounties-network/components';
 import { shortenAddress } from './../utils/helpers';
-import './baseStyles.module.css';
+import './baseStyles.css';
 
 const AddressMismatch = props => {
   const {
