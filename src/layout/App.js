@@ -1,121 +1,165 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-
+import { map } from 'lodash';
 import './App.css';
 import Logo from './logo';
-import LoginWalkthrough from '../modules/LoginWalkthrough';
 import { actions as handleActions } from '../modules/Handle';
 import { handleSelector, handleOnChainSelector } from '../modules/Handle/selectors';
-
+import LoadComponent from '../hocs/LoadComponent';
+import { Button, Loader, Network, Text, ToastContainer, TextInput, Textbox } from '@bounties-network/components';
+import { BountyItem } from '../components';
+import { actions as loginActions } from '../modules/LoginWalkthrough/reducer';
+import { actions, selectors } from '@bounties-network/modules';
 import TransactionWalkthrough from '../modules/TransactionWalkthrough/hocs/TransactionWalkthrough';
 import FunctionalLoginLock from '../modules/LoginWalkthrough/hocs/FunctionalLoginLock';
 import RequireLogin from '../modules/LoginWalkthrough/hocs/RequireLoginComponent';
-import { actions as loginActions } from '../modules/LoginWalkthrough/reducer';
-import { Button, Loader, Network, Text, ToastContainer, TextInput } from '@bounties-network/components';
-import { actions, selectors } from '@bounties-network/modules';
+import LoginWalkthrough from '../modules/LoginWalkthrough';
 
+const ListComponent = props => {
+  const {
+    bountiesState,
+    loading,
+    showLogin,
+    initiateLoginProtection,
+    bounties,
+    showCreate
+  } = props;
 
-const LoginComponent = props => {
-  const { loading, showLogin, initiateLoginProtection } = props;
-
-  return (
+  let content = (
     <div className="group">
-      <h1 className="logo"><Logo /></h1>
+      <div className="header">
+        <h1 className="logo"><Logo /></h1>
 
-      <Text>Welcome to the authentication demo</Text>
-      <Button
-        type="primary"
-        onClick={() => initiateLoginProtection(() => showLogin(true))}
-        loading={loading}
-      >
-        Login
-      </Button>
+        <Text>Welcome to the Bounties Network starter kit</Text>
+        <div className="button-group centered">
+          <Button
+            type="primary"
+            onClick={showCreate}
+            loading={loading}
+          >
+            New Bounty
+          </Button>
+          {props.currentUser && (
+            <Button
+              type="destructive"
+              loading={props.logoutState.loading}
+              onClick={props.logoutUser}
+            >
+              Logout
+            </Button>
+          )}
+        </div>
+
+      </div>
+      <div className="bounty-list">
+        <Text typeScale="Small" alignment='align-left'>Last 25 bounties:</Text>
+        {map(bounties, bounty => (
+          <BountyItem
+            key={bounty.id}
+            title={bounty.title}
+            issuer={bounty.issuer_address}
+          />
+        ))}
+      </div>
     </div>
   );
+
+  if (bountiesState.loading) {
+      content = <Loader color="white" size="medium" />;
+  }
+
+  return content;
 }
 
-const Login = compose()(LoginComponent)
+const List = compose(LoadComponent('loadBounties'))(ListComponent)
 
-class ProtectedComponent extends React.Component {
-  state = {
-    onchain: this.props.onChainHandleState.handle,
-    offchain: this.props.offChainHandleState.handle
-  };
-
+class CreateBountyComponent extends React.Component {
+  state = { title: null, body: null, amount: null };
   onTextChange = (key, value) => { this.setState({ [key]: value }) }
+
+  values = () => ({
+    title: this.state.title,
+    description: this.state.body,
+    categories: ['starter-kit'],
+    tokenContract: '',
+    experienceLevel: 'Beginner',
+    issuer_email: 'starter.kit@bounties.network',
+    issuer_name: 'Bounty User',
+    fulfillmentAmount: this.state.amount,
+    paysTokens: false,
+    privateFulfillments: false,
+    revisions: 0,
+    deadline: 999999999999999,
+    sourceDirectoryHash: '',
+    sourceFileName: '',
+    webReferenceURL: ''
+  })
 
   render() {
     const {
       currentUser,
       logoutUser,
-      offChainHandleState,
-      onChainHandleState,
-      saveOnChain,
-      saveOffChain
+      showList,
+      createBounty
     } = this.props;
-
-    const { onchain, offchain } = this.state;
+    const { title, body, amount } = this.state;
 
     return (
       <div className="group">
-        <div className="logo"><Logo /></div>
-        <Text>Welcome, <code>{currentUser.public_address}</code>.</Text>
+        <div className="form-input">
+          <div className="logo"><Logo /></div>
+          <Text>Create a new bounty</Text>
+        </div>
 
         <div className="form">
-          <div className="text-input">
+          <div className="form-input">
             <TextInput
-              placeholder="@ethBounties"
-              value={offchain}
-              disabled={offChainHandleState.saving}
-              onChange={value => this.onTextChange('offchain', value)}
+              placeholder="bounty title"
+              value={title}
+              onChange={value => this.onTextChange('title', value)}
             />
           </div>
+          <div className="form-input">
+            <Textbox
+              placeholder="bounty body"
+              value={body}
+              onChange={value => this.onTextChange('body', value)}
+            />
+          </div>
+          <div className="form-input">
+            <TextInput
+              placeholder="eth amount"
+              value={amount}
+              onChange={value => this.onTextChange('amount', value)}
+            />
+          </div>
+        </div>
+        <div className="button-group">
           <Button
-            className="button"
             type="action"
-            loading={offChainHandleState.saving}
-            disabled={offChainHandleState.saving}
-            onClick={() => saveOffChain(offchain)}
+            onClick={() => createBounty(this.values(), this.state.amount)}
           >
-            Save (off-chain)
+            Save
           </Button>
-        </div>
-
-        <div className="form">
-          <div className="text-input">
-            <TextInput
-              placeholder="@ethBounties"
-              value={onchain}
-              disabled={onChainHandleState.saving}
-              onChange={value => this.onTextChange('onchain', value)}
-            />
-          </div>
           <Button
-            className="button"
-            type="primary"
-            loading={onChainHandleState.saving}
-            disabled={onChainHandleState.saving}
-            onClick={() => saveOnChain(onchain)}>
-            Save (on-chain)
+            type="destructive"
+            onClick={showList}
+          >
+            Cancel
           </Button>
         </div>
-
-        <Button
-          type="destructive"
-          loading={this.props.logoutState.loading}
-          onClick={logoutUser}
-        >
-          Logout
-        </Button>
       </div>
     );
   }
 }
 
-const Protected = compose(RequireLogin)(ProtectedComponent)
+class AppComponent extends React.Component {
+  state = { stage: 'list' }
 
-class AppComponent extends Component {
+  showCreate = () => this.setState({ stage: 'create' });
+  showList = () => this.setState({ stage: 'list' });
+
   render() {
     const {
       loginState,
@@ -123,55 +167,59 @@ class AppComponent extends Component {
       currentUser,
       currentUserState,
       hasWallet,
-      initiateWalkthrough,
-      onChainHandleState,
-      offChainHandleState
+      initiateLoginProtection,
+      initiateWalkthrough
     } = this.props;
+
+    const { stage } = this.state;
 
     let content = '';
 
-    if (currentUser) {
+    if (stage === 'create') {
       content = (
-        <Protected
+        <CreateBountyComponent
           currentUser={currentUser}
-          saveOnChain={handle => initiateWalkthrough(() => this.props.saveOnChain(handle))}
-          saveOffChain={this.props.saveOffChain}
-          logoutUser={this.props.logoutUser}
-          logoutState={this.props.logoutState}
-          onChainHandleState={onChainHandleState}
-          offChainHandleState={offChainHandleState}
+          showList={this.showList}
+          createBounty={(values, balance) =>
+            initiateLoginProtection(() =>
+              initiateWalkthrough(() =>
+                this.props.createBounty(values, balance)
+          ))}
         />
       )
     }
 
-    if (!currentUser) {
+    if (stage === 'list') {
       content = (
-        <Login
-          loading={loginState.loading}
+        <List
+          bountiesState={this.props.bountiesState}
+          loadBounties={this.props.loadBounties}
+          bounties={this.props.bounties}
+          showCreate={this.showCreate}
           currentUser={currentUser}
-          showLogin={this.props.showLogin}
-          initiateLoginProtection={this.props.initiateLoginProtection}
+          logoutState={this.props.logoutState}
+          logoutUser={this.props.logoutUser}
         />
       );
     }
 
     const isPageLoading = currentUserState.loading ||
                           !currentUserState.loaded ||
-                          !clientInitialized ||
-                          onChainHandleState.loading ||
-                          offChainHandleState.loading
+                          !clientInitialized
 
     if (isPageLoading) {
-      content = (
-        <div className="center">
-          <Loader color="white" size="medium" />
-        </div>
-      );
+      content = <Loader color="white" size="medium" />;
     }
 
     return (
       <React.Fragment>
-        <div className="center">
+        <div className={[
+          'center', (
+            isPageLoading ||
+            this.props.bountiesState.loading ||
+            this.state.stage === 'create'
+          ) && 'loading'].join(' ')}
+        >
           <ToastContainer
             newestOnTop
             autoClose={false}
@@ -189,8 +237,8 @@ class AppComponent extends Component {
 
 const mapStateToProps = state => {
   return {
-    offChainHandleState: handleSelector(state),
-    onChainHandleState: handleOnChainSelector(state),
+    bounties: selectors.bounties.bountiesSelector(state),
+    bountiesState: selectors.bounties.bountiesStateSelector(state),
     loginState: selectors.authentication.loginStateSelector(state),
     logoutState: selectors.authentication.logoutStateSelector(state),
     currentUser:selectors.authentication.getCurrentUserSelector(state),
@@ -212,11 +260,11 @@ const App = compose(
   connect(
     mapStateToProps,
     {
+      loadBounties: actions.bounties.loadBounties,
       showLogin: loginActions.showLogin,
       login: actions.authentication.login,
       logoutUser: actions.authentication.logout,
-      saveOnChain: handleActions.saveOnChainHandle,
-      saveOffChain: handleActions.saveHandle,
+      createBounty: actions.bounty.createBounty,
     }
   )
 )(AppComponent);

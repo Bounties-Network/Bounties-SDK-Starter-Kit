@@ -1,0 +1,19 @@
+.bounty-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5em;
+}
+
+.bounty-item:nth-child(odd) {
+  opacity: 60%;
+  background-color: rgba(205,205,205,0.6);
+}
+
+.bounty-item:nth-child(even) {
+  opacity: 60%;
+  background-color: rgba(103,103,103,0.6);
+}
+
+.issuer-avatar {
+  margin-right: 1em;
+}

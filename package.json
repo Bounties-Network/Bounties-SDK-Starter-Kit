@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@bounties-network/components": "^0.0.6",
-    "@bounties-network/modules": "^0.0.2",
     "@fortawesome/fontawesome": "^1.1.8",
     "@fortawesome/fontawesome-free-brands": "^5.0.13",
     "@fortawesome/fontawesome-svg-core": "^1.2.0",

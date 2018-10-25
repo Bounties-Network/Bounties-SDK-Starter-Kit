@@ -8,29 +8,56 @@
   left: 0.5em;
 }
 
-.group > div:not(:last-child) {
-  min-width: 35vw;
-  margin-bottom: 0.5em;
+.logout {
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
 }
 
-.group > p:not(:last-child) {
+.loading {
+  align-items: center;
+}
+
+.header > p:not(:last-child) {
   margin-bottom: 1em;
+}
+
+.header {
+  margin: 2rem 0;
 }
 
 .center {
   background-color: #282c34;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
   text-align: center;
 }
 
+.group {
+  min-width: 30rem;
+}
+
+
+.bounty-list {
+  width: 40rem;
+  margin-bottom: 3rem;
+}
+
+.bounty-list > p:not(:last-child) {
+  margin-bottom: 1em;
+}
+
 .form {
   display: flex;
+  flex-direction: column;
+}
+
+.form-input {
+  margin-bottom: 1rem;
 }
 
 .text-input {
@@ -41,4 +68,17 @@
 .button {
   text-align: center;
   min-width: 11em;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.button-group.centered {
+  justify-content: center;
+}
+
+.button-group >button {
+  margin-right: 1rem;
 }

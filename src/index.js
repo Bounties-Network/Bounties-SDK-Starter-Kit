@@ -14,11 +14,23 @@ import { reducers as modulesReducers, sagaWatchers as modulesSagas } from './mod
 import client from '@bounties-network/modules'
 
 client.settings = {
-  "networkName": "starter kit",
+  "platforms": {
+    "bounties-network": ["bounties-network", "starter-kit"]
+  },
+  "postingPlatform": "starter-kit",
+  "postingSchema": "standardSchema",
+  "postingSchemaVersion": "0.1",
+  "categoryPlatform": "main",
+  "networkName": "Bounties Starter Kit",
   "requiredNetwork": "rinkeby",
   "url": {
-    "mainNet": "http://localhost:8000",
-    "rinkeby": "http://localhost:8000"
+    "mainNet": "https://rinkebystaging.api.bounties.network",
+    "rinkeby": "https://rinkebystaging.api.bounties.network"
+  },
+  "deployments": {
+    "StandardBounties": {
+      "rinkeby": "0xdd1636b88e9071507e859e61991ed4be6647f420"
+    }
   }
 }
 
