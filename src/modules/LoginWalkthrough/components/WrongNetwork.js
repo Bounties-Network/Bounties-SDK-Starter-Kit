@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { config } from '@bounties-network/modules';
+import { config } from 'bounties';
 import { Modal, Text, Button } from '@bounties-network/components';
 const WrongNetwork = props => {
   const { visible, onClose, pageLevel, closable } = props;

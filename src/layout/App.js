@@ -10,7 +10,7 @@ import LoadComponent from '../hocs/LoadComponent';
 import { Button, Loader, Network, Text, ToastContainer, TextInput, Textbox } from '@bounties-network/components';
 import { BountyItem } from '../components';
 import { actions as loginActions } from '../modules/LoginWalkthrough/reducer';
-import { actions, selectors } from '@bounties-network/modules';
+import { actions, selectors } from 'bounties';
 import TransactionWalkthrough from '../modules/TransactionWalkthrough/hocs/TransactionWalkthrough';
 import FunctionalLoginLock from '../modules/LoginWalkthrough/hocs/FunctionalLoginLock';
 import RequireLogin from '../modules/LoginWalkthrough/hocs/RequireLoginComponent';

@@ -1,5 +1,5 @@
 import { takeLatest, put } from 'redux-saga/effects';
-import { actionTypes } from '@bounties-network/modules';
+import { actionTypes } from 'bounties';
 import { actions as loginUIActions } from './reducer';
 
 const { LOGIN_SUCCESS } = actionTypes.authentication;

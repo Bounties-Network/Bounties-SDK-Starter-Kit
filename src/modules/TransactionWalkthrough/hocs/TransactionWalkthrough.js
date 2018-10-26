@@ -3,7 +3,7 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { curry } from 'lodash';
 import TransactionWalkthrough from '../';
-import { actions, selectors } from '@bounties-network/modules';
+import { actions, selectors } from 'bounties';
 
 const {
   rootTransactionSelector,

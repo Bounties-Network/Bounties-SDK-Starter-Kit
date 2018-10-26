@@ -8,10 +8,10 @@ import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 import { Provider } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
 
-import { reducers as bnReducers, sagaWatchers as bnSagas } from '@bounties-network/modules';
+import { reducers as bnReducers, sagaWatchers as bnSagas } from 'bounties';
 import { reducers as modulesReducers, sagaWatchers as modulesSagas } from './modules';
 
-import client from '@bounties-network/modules'
+import client from 'bounties'
 
 client.settings = {
   "platforms": {

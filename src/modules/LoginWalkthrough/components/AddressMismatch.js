@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Text, Button, Avatar } from '@bounties-network/components';
-import config from '@bounties-network/modules';
+import config from 'bounties';
 import { shortenAddress } from './../utils/helpers';
 import './baseStyles.css';
 

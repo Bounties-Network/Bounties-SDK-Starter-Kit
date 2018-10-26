@@ -12,7 +12,7 @@ import {
 import { rootLoginSelector } from './selectors';
 import { actions } from './reducer';
 
-import { actions as moduleActions, selectors } from '@bounties-network/modules';
+import { actions as moduleActions, selectors } from 'bounties';
 
 const {
   getCurrentUserSelector,

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Text, Button } from '@bounties-network/components';
-import config from '@bounties-network/modules';
+import config from 'bounties';
 
 const UnlockWallet = props => {
   const { visible, onClose, pageLevel, closable } = props;

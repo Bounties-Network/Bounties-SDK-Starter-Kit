@@ -8,7 +8,7 @@ import {
   ErrorModal,
   WrongNetwork
 } from './components';
-import modulesConfig, { actions, selectors } from '@bounties-network/modules';
+import modulesConfig, { actions, selectors } from 'bounties';
 
 const authActions = actions.authentication
 const {

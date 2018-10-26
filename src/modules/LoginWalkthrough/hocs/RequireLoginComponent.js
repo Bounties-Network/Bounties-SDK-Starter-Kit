@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import './RequireLoginComponent.module.css';
 import { ZeroState, Card } from '@bounties-network/components';
 import { actions as loginActions } from '../reducer';
-import { selectors } from '@bounties-network/modules';
+import { selectors } from 'bounties';
 import LoginLock from '../LoginLock';
 
 const { getCurrentUserSelector } = selectors.authentication;

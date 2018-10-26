@@ -1,5 +1,5 @@
 import React from 'react';
-import { actions as modulesActions, actionTypes as modulesActionTypes, selectors, request, sagas, helpers } from '@bounties-network/modules';
+import { actions as modulesActions, actionTypes as modulesActionTypes, selectors, request, sagas, helpers } from 'bounties';
 import { call, put, takeLatest, select } from 'redux-saga/effects';
 import { actionTypes, actions } from './';
 import { handleOnChainSelector } from './selectors';

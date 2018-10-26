@@ -1,4 +1,4 @@
-import { actionTypes as moduleActionTypes } from '@bounties-network/modules';
+import { actionTypes as moduleActionTypes } from 'bounties';
 
 const { RESET_LOGIN_STATE } = moduleActionTypes.authentication;
 

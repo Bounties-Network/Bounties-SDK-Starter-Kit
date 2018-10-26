@@ -1,4 +1,4 @@
-import { actionTypes as modulesActionTypes } from '@bounties-network/modules';
+import { actionTypes as modulesActionTypes } from 'bounties';
 
 const { GET_CURRENT_USER_SUCCESS, LOGIN_SUCCESS } = modulesActionTypes.authentication;
 const defaultHandleState = {
